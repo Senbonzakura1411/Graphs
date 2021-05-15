@@ -1,10 +1,12 @@
+using System;
 using UnityEngine;
 using static UnityEngine.Mathf;
+using Random = UnityEngine.Random;
 
 public static class FunctionLibrary
 {
     public delegate Vector3 Function(float u, float v, float t);
-
+    public static int FunctionCount => _functions.Length;
     public enum FunctionName
     {
         Wave,
@@ -33,19 +35,17 @@ public static class FunctionLibrary
             _ => null
         };
     }
-
-    // This next 2 methods are not agnostic but I don't think creating an array for this is worth.
-    // Just update them if a new function is added to the library.
     
-    // First condition check on this one should always be the last item from the enum.
+    private static readonly FunctionName[] _functions = Enum.GetValues(typeof(FunctionName)) as FunctionName[];
+    
+    
+
     public static FunctionName GetNextFunctionName(FunctionName name)
     {
-       return name < FunctionName.TwistedTorus ?  name + 1 :  0;
+       return name < _functions[FunctionCount - 1] ?  name + 1 :  0;
     }
-    
-    // Second parameter on Random.Range should be last item from the enum.
     public static FunctionName GetRandomFunctionNameOtherThan (FunctionName name) {
-        var choice = (FunctionName)Random.Range(1, (int)FunctionName.TwistedTorus);
+        var choice = (FunctionName)Random.Range(1, FunctionCount - 1);
         return choice == name ? 0 : choice;
     }
 
@@ -53,6 +53,8 @@ public static class FunctionLibrary
     {
         return Vector3.LerpUnclamped(from(u, v, t), to(u, v, t), SmoothStep(0f, 1f, progress));
     }
+    
+   
     static Vector3 Wave(float u, float v, float t)
     {
         Vector3 p;
@@ -109,7 +111,7 @@ public static class FunctionLibrary
     
     static Vector3 TwistedSphere(float u, float v, float t)
     {
-        float r = 0.9f + 0.1f * Sin(PI * (6f * u + 4f * v + t));
+        float r = 0.9f + 0.1f * Sin(PI * (12f * u + 8f * v + t));
         float s = r * Cos(0.5f * PI * v);
         Vector3 p;
         p.x = s * Sin(PI * u);
@@ -132,8 +134,8 @@ public static class FunctionLibrary
     
     static Vector3 TwistedTorus(float u, float v, float t)
     {
-        float r1 = 0.7f + 0.1f * Sin(PI * (6f * u + 0.5f * t));
-        float r2 = 0.15f + 0.05f * Sin(PI * (8f * u + 4f * v + 2f * t));
+        float r1 = 0.7f + 0.1f * Sin(PI * (8f * u + 0.5f * t));
+        float r2 = 0.15f + 0.05f * Sin(PI * (16f * u + 8f * v + 3f * t));
         float s = r1 + r2 * Cos(PI * v);
         Vector3 p;
         p.x = s * Sin(PI * u);
